@@ -1,0 +1,158 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == 'srikumarpandian12@gmail.com' && request.auth.token.email_verified == true)
+      );
+    }
+
+    // Student Validation Blueprint
+    function isValidStudent(data) {
+      return data.keys().hasAll(['apaarId', 'name', 'program', 'institution', 'intakeYear', 'status', 'submittedBy']) &&
+             data.apaarId is string && data.apaarId.size() >= 12 && data.apaarId.size() <= 14 &&
+             data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
+             data.program is string && data.program.size() >= 2 && data.program.size() <= 100 &&
+             data.institution is string && data.institution.size() >= 2 && data.institution.size() <= 120 &&
+             data.intakeYear is number &&
+             data.status in ['verified', 'pending', 'flagged', 'incomplete'] &&
+             data.submittedBy is string && data.submittedBy.size() <= 128 &&
+             (!('apaarMasked' in data) || (data.apaarMasked is string && data.apaarMasked.size() <= 32)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 120)) &&
+             (!('institutionId' in data) || (data.institutionId is string && data.institutionId.size() <= 64)) &&
+             (!('completeness' in data) || data.completeness is number) &&
+             (!('submittedByName' in data) || (data.submittedByName is string && data.submittedByName.size() <= 120)) &&
+             (!('isDuplicateCandidate' in data) || data.isDuplicateCandidate is bool) &&
+             (!('flagReason' in data) || (data.flagReason is string && data.flagReason.size() <= 300)) &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 64)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    // Institution Validation Blueprint
+    function isValidInstitution(data) {
+      return data.keys().hasAll(['id', 'name', 'approvedIntake']) &&
+             data.id is string && data.id.size() <= 64 &&
+             data.name is string && data.name.size() >= 3 && data.name.size() <= 120 &&
+             data.approvedIntake is number &&
+             (!('enrolledCount' in data) || data.enrolledCount is number) &&
+             (!('verifiedCount' in data) || data.verifiedCount is number) &&
+             (!('location' in data) || (data.location is string && data.location.size() <= 150)) &&
+             (!('category' in data) || (data.category is string && data.category.size() <= 100)) &&
+             (!('collegeType' in data) || (data.collegeType is string && data.collegeType.size() <= 100)) &&
+             (!('district' in data) || (data.district is string && data.district.size() <= 100)) &&
+             (!('verificationStatus' in data) || (data.verificationStatus is string && data.verificationStatus.size() <= 100)) &&
+             (!('verificationDetails' in data) || (data.verificationDetails is string && data.verificationDetails.size() <= 300)) &&
+             (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    // Audit Log Validation Blueprint
+    function isValidAuditLog(data) {
+      return data.keys().hasAll(['action', 'performedBy', 'details', 'timestamp']) &&
+             data.action is string && data.action.size() <= 64 &&
+             data.performedBy is string && data.performedBy.size() <= 128 &&
+             data.details is string && data.details.size() <= 500 &&
+             data.timestamp is string && data.timestamp.size() <= 64 &&
+             (!('performerEmail' in data) || (data.performerEmail is string && data.performerEmail.size() <= 120)) &&
+             (!('targetStudentId' in data) || (data.targetStudentId is string && data.targetStudentId.size() <= 128));
+    }
+
+    // User Profile Validation Blueprint
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email', 'role']) &&
+             data.uid is string && data.uid.size() <= 128 &&
+             data.email is string && data.email.size() <= 120 &&
+             data.role in ['admin', 'institution', 'student'] &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('institutionName' in data) || (data.institutionName is string && data.institutionName.size() <= 120)) &&
+             (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 64));
+    }
+
+    // Students Collection
+    match /students/{studentId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+
+      allow create: if isSignedIn() &&
+                       isValidId(studentId) &&
+                       isValidStudent(incoming()) &&
+                       (incoming().submittedBy == request.auth.uid || isAdmin());
+
+      allow update: if isSignedIn() &&
+                       isValidId(studentId) &&
+                       isValidStudent(incoming()) &&
+                       (isAdmin() || existing().submittedBy == request.auth.uid);
+
+      allow delete: if isSignedIn() &&
+                       isValidId(studentId) &&
+                       (isAdmin() || existing().submittedBy == request.auth.uid);
+    }
+
+    // Institutions Collection
+    match /institutions/{institutionId} {
+      allow get, list: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(institutionId) && isValidInstitution(incoming()) && (isAdmin() || request.auth.token.email_verified == true);
+      allow delete: if isAdmin();
+    }
+
+    // Audit Logs Collection (Append-Only)
+    match /audit_logs/{logId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() &&
+                       isValidId(logId) &&
+                       isValidAuditLog(incoming()) &&
+                       incoming().performedBy == request.auth.uid;
+      allow update, delete: if false; // strictly immutable audit trail
+    }
+
+    // User Profiles Collection
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       userId == request.auth.uid;
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       (userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Admins Collection
+    match /admins/{adminId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}

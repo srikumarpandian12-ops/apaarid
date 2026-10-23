@@ -1,0 +1,265 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * APAAR SmartVerify AI — design system.
+ * Palette: deep forest / dark green / emerald / mint / warm gold / warm white.
+ * All colors use oklch. Register new colors in :root + @theme inline.
+ */
+
+@theme inline {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Brand palette */
+  --color-forest: var(--forest);
+  --color-canopy: var(--canopy);
+  --color-canopy-foreground: var(--canopy-foreground);
+  --color-emerald: var(--brand-emerald);
+  --color-mint: var(--mint);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+
+  /* Elevation scale */
+  --shadow-e1: var(--elevation-1);
+  --shadow-e2: var(--elevation-2);
+  --shadow-e3: var(--elevation-3);
+  --shadow-e4: var(--elevation-4);
+
+  /* Motion */
+  --animate-float-slow: float-slow 9s ease-in-out infinite;
+  --animate-float-slower: float-slow 14s ease-in-out infinite;
+  --animate-glow-drift: glow-drift 14s ease-in-out infinite alternate;
+  --animate-sheen: sheen 2.4s ease-in-out infinite;
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow-drift {
+  0% {
+    opacity: 0.55;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0.8;
+    transform: translate3d(3%, -4%, 0) scale(1.08);
+  }
+}
+
+@keyframes sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  60%,
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+:root {
+  --radius: 0.875rem;
+
+  /* Surfaces */
+  --background: oklch(0.977 0.004 134.8); /* warm white #F6F8F5 */
+  --foreground: oklch(0.24 0.028 163);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.028 163);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.028 163);
+
+  /* Actions & state */
+  --primary: oklch(0.471 0.094 159.5); /* emerald #1D6B48 */
+  --primary-foreground: oklch(0.99 0.005 140);
+  --secondary: oklch(0.945 0.02 152); /* mint-tinted surface */
+  --secondary-foreground: oklch(0.324 0.059 161.2);
+  --muted: oklch(0.955 0.012 150);
+  --muted-foreground: oklch(0.549 0.02 158.7); /* #68756D */
+  --accent: oklch(0.93 0.045 152);
+  --accent-foreground: oklch(0.324 0.059 161.2);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.905 0.018 155);
+  --input: oklch(0.905 0.018 155);
+  --ring: oklch(0.471 0.094 159.5);
+
+  /* Charts */
+  --chart-1: oklch(0.471 0.094 159.5);
+  --chart-2: oklch(0.791 0.087 84.7);
+  --chart-3: oklch(0.324 0.059 161.2);
+  --chart-4: oklch(0.853 0.046 155.3);
+  --chart-5: oklch(0.62 0.11 145);
+
+  /* Brand palette */
+  --forest: oklch(0.191 0.02 166.2); /* #0B1712 */
+  --canopy: oklch(0.324 0.059 161.2); /* #123D2A */
+  --canopy-foreground: oklch(0.96 0.02 150);
+  --brand-emerald: oklch(0.471 0.094 159.5);
+  --mint: oklch(0.853 0.046 155.3); /* #B8D8C2 */
+  --gold: oklch(0.791 0.087 84.7); /* #D5B779 */
+  --gold-soft: oklch(0.92 0.05 88);
+
+  /* Elevation scale — layered shadows, never random */
+  --elevation-1: 0 1px 2px oklch(0.191 0.02 166.2 / 0.05), 0 1px 1px oklch(0.191 0.02 166.2 / 0.03);
+  --elevation-2:
+    0 1px 2px oklch(0.191 0.02 166.2 / 0.05), 0 8px 24px -12px oklch(0.191 0.02 166.2 / 0.14);
+  --elevation-3:
+    0 2px 6px oklch(0.191 0.02 166.2 / 0.06), 0 16px 40px -16px oklch(0.191 0.02 166.2 / 0.2);
+  --elevation-4:
+    0 4px 12px oklch(0.191 0.02 166.2 / 0.08), 0 32px 64px -24px oklch(0.191 0.02 166.2 / 0.28);
+}
+
+.dark {
+  --background: oklch(0.191 0.02 166.2);
+  --foreground: oklch(0.96 0.02 150);
+  --card: oklch(0.24 0.03 164);
+  --card-foreground: oklch(0.96 0.02 150);
+  --popover: oklch(0.24 0.03 164);
+  --popover-foreground: oklch(0.96 0.02 150);
+  --primary: oklch(0.853 0.046 155.3);
+  --primary-foreground: oklch(0.191 0.02 166.2);
+  --secondary: oklch(0.28 0.04 162);
+  --secondary-foreground: oklch(0.96 0.02 150);
+  --muted: oklch(0.28 0.04 162);
+  --muted-foreground: oklch(0.7 0.03 155);
+  --accent: oklch(0.28 0.04 162);
+  --accent-foreground: oklch(0.96 0.02 150);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.471 0.094 159.5);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-gold) 40%, transparent);
+  }
+}
+
+/* Frosted glass — light surfaces (nav, floating panels) */
+@utility glass {
+  background: color-mix(in oklab, white 68%, transparent);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid color-mix(in oklab, white 60%, transparent);
+}
+
+/* Frosted glass — on dark forest surfaces */
+@utility glass-dark {
+  background: color-mix(in oklab, white 7%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid color-mix(in oklab, white 12%, transparent);
+}
+
+/* Soft ambient hero glow */
+@utility ambient-glow {
+  background:
+    radial-gradient(
+      42rem 24rem at 78% 12%,
+      color-mix(in oklab, var(--color-mint) 42%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      30rem 20rem at 12% 82%,
+      color-mix(in oklab, var(--color-gold) 18%, transparent),
+      transparent 70%
+    );
+}
+
+/* Fine dotted texture for dark sections */
+@utility dot-texture {
+  background-image: radial-gradient(
+    color-mix(in oklab, white 14%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+}
+
+/* Restrained sheen sweep for primary CTAs */
+@utility cta-sheen {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: linear-gradient(
+      100deg,
+      transparent,
+      color-mix(in oklab, white 28%, transparent),
+      transparent
+    );
+    transform: translateX(-120%);
+    animation: sheen 3.2s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "APAAR SmartVerify AI",
+  "description": "Trusted academic identity for Indian institutions with automated verification and compliance.",
+  "permissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
